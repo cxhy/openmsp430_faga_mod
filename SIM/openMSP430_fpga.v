@@ -33,7 +33,7 @@
 //----------------------------------------------------------------------------
 // $Rev: 205 $
 // $LastChangedBy: olivier.girard $
-// $LastChangedDate: 2016-03-19 15:47:31 $
+// $LastChangedDate: 2015-07-15 22:59:52 +0200 (Wed, 15 Jul 2015) $
 //----------------------------------------------------------------------------
 
 `include "openMSP430_defines.v"
@@ -42,11 +42,17 @@ module  openMSP430_fpga(
       dco_clk ,
 	  lfxt_clk,
 	  reset_n,
-	  p1_dout
+      uart_rxd,
+
+	  uart_txd,
+      p1_dout
 );
 input  dco_clk ;
 input  lfxt_clk;
 input  reset_n;
+input  uart_rxd;
+
+output uart_txd;
 output p1_dout;
 
 
@@ -135,15 +141,15 @@ wire               trigger2;
 
 wire               code_sel_tri;
 
-wire    [15:0]  encoder_buffer_din;
-wire           encoder_buffer_din_en;
-wire    [15:0] decoder_buffer_dout;
-wire           decoder_buffer_dout_en;
-wire    [15:0]  code_ctrl;
-wire           code_ctrl_en;
-wire    [15:0] viterbi_long;
+wire    [15:0]     encoder_buffer_din;
+wire               encoder_buffer_din_en;
+wire    [15:0]     decoder_buffer_dout;
+wire               decoder_buffer_dout_en;
+wire    [15:0]     code_ctrl;
+wire               code_ctrl_en;
+wire    [15:0]     viterbi_long;
 
-wire    [15:0] per_dout_d2v;
+wire    [15:0]     per_dout_d2v;
 
 
 // Peripheral templates
@@ -195,7 +201,7 @@ wire        [13:0] wkup_in;
 wire               dbg_freeze;
 wire               dbg_uart_txd;
 wire               dbg_uart_rxd;
-
+//uart
 wire               uart_rxd;
 wire               uart_txd;
 
@@ -456,7 +462,7 @@ assign per_dout = per_dout_dio       |
 				  per_dout_temp_16b  |
 				  per_dout_d2v       |
                   per_dout_dma       |
-                  per_dout_uart      ;
+                  per_dout_uart;
 
 
 //
@@ -500,31 +506,33 @@ assign wkup_in = wkup | {1'b0,                 // Vector 13  (0xFFFA)
 
 
 /////////////////dma_master///////////////////////
+//
+
 
 dma_master u_dma_master(
-		.mclk       (mclk),
-		.puc_rst    (puc_rst),
-		.dma_ready  (dma_ready),
-		.dma_resp   (dma_resp),
-		.dma_dout   (dma_dout),
+        .mclk       (mclk),
+        .puc_rst    (puc_rst),
+        .dma_ready  (dma_ready),
+        .dma_resp   (dma_resp),
+        .dma_dout   (dma_dout),
 
-		.per_addr   (per_addr),             // Peripheral address
+        .per_addr   (per_addr),             // Peripheral address
         .per_din    (per_din),              // Peripheral data input
-		.per_en     (per_en),               // Peripheral enable (high active)///
-		.per_we     (per_we),               // Peripheral write enable (high active)
-		.code_sel_tri (code_sel_tri),
+        .per_en     (per_en),               // Peripheral enable (high active)///
+        .per_we     (per_we),               // Peripheral write enable (high active)
+        .code_sel_tri (code_sel_tri),
 
-		.per_dout   (per_dout_dma),    // Peripheral data output
-		.trigger0   (trigger0),
-		.trigger1   (trigger1),
-		.trigger2   (trigger2),
+        .per_dout   (per_dout_dma),    // Peripheral data output
+        .trigger0   (trigger0),
+        .trigger1   (trigger1),
+        .trigger2   (trigger2),
 
-		.dma_wkup   (dma_wkup),
-		.dma_addr   (dma_addr),
-		.dma_din    (dma_din),
-		.dma_en     (dma_en),
-		.dma_we     (dma_we),
-		.dma_priority (dma_priority)
+        .dma_wkup   (dma_wkup),
+        .dma_addr   (dma_addr),
+        .dma_din    (dma_din),
+        .dma_en     (dma_en),
+        .dma_we     (dma_we),
+        .dma_priority (dma_priority)
 );
 
 dma_tfbuffer dma_tfbuffer_u(
@@ -535,12 +543,12 @@ dma_tfbuffer dma_tfbuffer_u(
     .per_en                 (per_en),
     .per_we                 (per_we),
     .encoder_buffer_din     (encoder_buffer_din),
-	.encoder_buffer_din_en  (encoder_buffer_din_en),
+    .encoder_buffer_din_en  (encoder_buffer_din_en),
     .decoder_buffer_dout    (decoder_buffer_dout),
-	.decoder_buffer_dout_en (decoder_buffer_dout_en),
+    .decoder_buffer_dout_en (decoder_buffer_dout_en),
     .code_ctrl              (code_ctrl),
-	.code_ctrl_en           (code_ctrl_en),
-	.viterbi_long           (viterbi_long),
+    .code_ctrl_en           (code_ctrl_en),
+    .viterbi_long           (viterbi_long),
     .per_dout               (per_dout_d2v)
     );
 
@@ -562,22 +570,21 @@ viterbi_conv_top viterbi_conv_top_0(
 	 .code_sel_tri               (code_sel_tri)
      );
 ////////////////////////////////////////////////////
-
-
+///
 //uart
-//已经声明了 per_dout_uart 、 uart_rxd  、  uart_txd  三个变量。并把per_dout_uart接到外设输出口上
+//已经声明了 per_dout_uart 、 uart_rxd  、  uart_txd  三个信号。并把per_dout_uart接到外设输出口上
 
-uart uart_u(
+uart_top uart_top_u(
         //input
         .mclk       (mclk),
         .puc_rst    (puc_rst),
-        .uart_rxd   (uart_rxd),
+        .rs232_rx   (uart_rxd),
         .per_addr   (per_addr),             // Peripheral address
         .per_din    (per_din),              // Peripheral data input
         .per_en     (per_en),               // Peripheral enable (high active)
         .per_we     (per_we),               // Peripheral write enable (high active)
         //output
-        .uart_txd   (uart_txd),
+        .rs232_tx   (uart_txd),
         .per_dout   (per_dout_uart)          // Peripheral data output
     );
 

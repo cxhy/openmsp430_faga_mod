@@ -3,7 +3,10 @@ vmap work work
 
 vlog -work work tb_openMSP430_fpga.v
 vlog -work work openMSP430.v
+vlog -work work openMSP430_fpga.v
 vlog -work work altera_mf.v
+vlog -work work rom16x2048.v
+vlog -work work ram16x512.v
 
 vlog -work work dma_decode_16b.v
 vcom -work work dma_channel.vhd
@@ -66,6 +69,12 @@ vlog -work work template_periph_8b.v
 vlog -work work template_periph_16b.v
 vlog -work work timescale.v
 
+vlog -work work uart_rx.v
+vlog -work work uart_speed_select.v
+vlog -work work uart_top.v
+vlog -work work uart_tx.v
+vlog -work work print_task.v
+
 vsim -novopt tb_openMSP430_fpga
 #add wave sim:/tb_openMSP430/fifo_ctl_1/*
 #add wave sim:/tb_openMSP430/u_dma_master/u_dma_decode_16b/*
@@ -74,8 +83,9 @@ vsim -novopt tb_openMSP430_fpga
 #add wave sim:/tb_openMSP430/u_dma_master/channel_2/*
 #add wave sim:/tb_openMSP430/u_dma_master/channel_3/*
 #add wave sim:/tb_openMSP430/u_dma_master/channel_4/*
-add wave sim:/tb_openMSP430_fpga/msp430/u_dma_master/*
+add wave -position insertpoint sim:/tb_openMSP430_fpga/*
+add wave -position insertpoint sim:/tb_openMSP430_fpga/msp430/uart_top_u/*
 radix -hex
 view wave
-run 500us
+run -all
 
