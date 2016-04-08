@@ -109,32 +109,6 @@ initial
 
      rx_bps = BPS9600;
      tx_bps = BPS9600;
-
-    //  uart_rxd = 1;
-    //  #tx_bps;
-
-    // uart_rxd = 1;
-    // #tx_bps;
-    // uart_rxd = 0;
-    // #tx_bps;
-    // uart_rxd = 1;
-    // #tx_bps;
-    // uart_rxd = 0;
-    // #tx_bps;
-    // uart_rxd = 1;
-    // #tx_bps;
-    // uart_rxd = 0;
-    // #tx_bps;
-    // uart_rxd = 1;
-    // #tx_bps;
-    // uart_rxd = 0;
-    // #tx_bps;
-
-    // uart_rxd = 1;
-    // #tx_bps;
-    // #tx_bps;
-    // tx_task(01010101);
-    //
     for(cnt=0; cnt<255; cnt=cnt+1)begin
       tx_task(cnt);
       @(negedge rx_flag)begin
@@ -162,23 +136,6 @@ initial
         end
     end
     print.terminate;
-
-
-
-
-  //    for(cnt=0; cnt<255; cnt=cnt+1)begin
-  //        tx_task(cnt);
-  //        @(negedge rx_flag)begin
-  //            if(data_temp == cnt)begin
-  //                $write("order data transmit: %d,receive:%d;OK\n",cnt,data_temp);
-  //            end
-  //            else begin
-  //                $write("order data transmit: %d,receive:%d;error\n",cnt,data_temp);
-  //                print.error("false");
-  //            end
-  //        end
-  //    end
-  //    print.terminate;
   end
 
 task tx_task;
